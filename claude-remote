@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# claude-remote - Wrapper around claude command for remote operations
+# Usage: claude-remote host:path [claude arguments...]
+
+set -euo pipefail
+
+# Debug mode if CLAUDE_REMOTE_DEBUG is set
+if [ "${CLAUDE_REMOTE_DEBUG:-}" = "1" ]; then
+    set -x
+fi
+
+# Check if at least one argument is provided
+if [ $# -lt 1 ]; then
+    echo "Usage: claude-remote host:path [claude arguments...]" >&2
+    echo "Example: claude-remote myserver:/home/user/project --resume" >&2
+    exit 1
+fi
+
+# Extract host:path target
+TARGET="$1"
+shift
+
+# Validate target format
+if [[ ! "$TARGET" =~ ^[^:]+:.+ ]]; then
+    echo "Error: Target must be in format 'host:path'" >&2
+    echo "Example: myserver:/home/user/project" >&2
+    exit 1
+fi
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Path to the MCP server
+MCP_SERVER="$SCRIPT_DIR/dist/index.js"
+
+# Check if MCP server exists and is built
+if [ ! -f "$MCP_SERVER" ]; then
+    echo "Error: MCP server not found at $MCP_SERVER" >&2
+    echo "Run 'npm run build' in $SCRIPT_DIR first" >&2
+    exit 1
+fi
+
+# Extract host from target for SSH validation
+HOST="${TARGET%%:*}"
+
+# Test SSH connectivity 
+echo "Testing SSH connection to $HOST..." >&2
+if ! ssh -o ConnectTimeout=5 -o BatchMode=yes "$HOST" true; then
+    echo "Error: Cannot connect to SSH host '$HOST'" >&2
+    echo "Ensure the host is reachable and SSH key authentication is configured" >&2
+    echo "Password authentication is not currently supported" >&2
+    exit 1
+fi
+echo "SSH connection successful." >&2
+
+# Create MCP config JSON with target argument
+MCP_CONFIG=$(cat <<EOF
+{
+  "mcpServers": {
+    "claude-remote": {
+      "command": "node",
+      "args": ["$MCP_SERVER", "$TARGET"]
+    }
+  }
+}
+EOF
+)
+
+# Launch claude with disabled local tools and enabled MCP server
+echo "Launching Claude with remote tools for $TARGET..." >&2
+exec claude \
+    --disallowedTools "Bash,Read,Write,Edit,MultiEdit,LS,Glob,Grep,NotebookEdit" \
+    --mcp-config "$MCP_CONFIG" \
+    --append-system-prompt "You are operating on remote system $TARGET. Use the Remote versions of tools (BashRemote, ReadRemote, etc.) which automatically operate on the target system." \
+    "$@"
