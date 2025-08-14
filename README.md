@@ -50,7 +50,7 @@ The completion provides:
 
    # Pass any claude arguments
    claude-remote myserver:/path/to/project --resume
-   claude-remote myserver:/path/to/project "help me debug this code"
+   claude-remote myserver:/path/to/project -p "help me debug this code"
    ```
 
 3. **Claude now operates remotely** - all file operations, commands, and tools work on the remote system!
