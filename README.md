@@ -101,6 +101,12 @@ When using `claude-remote`, Claude has access to these remote tools:
 - No credentials stored or transmitted
 - Local tools are disabled when operating remotely
 
+### Permission Management
+
+For security, `claude-remote` automatically removes any previously allowed Remote tool permissions before launching Claude. This prevents permission confusion where users might grant tool permissions in a local directory thinking they apply to the remote directory, only to have those permissions unexpectedly carry over to different SSH targets from the same local directory.
+
+**Important:** This means that Remote tools cannot be permanently allowed for specific remote directories - you will need to grant permissions each time you use `claude-remote`. This is a necessary security trade-off to prevent unauthorized access to different remote systems.
+
 ## 🐛 Troubleshooting
 
 **SSH Connection Issues:**

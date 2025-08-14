@@ -67,6 +67,18 @@ MCP_CONFIG=$(cat <<EOF
 EOF
 )
 
+# Remove any previously allowed Remote tools for security
+# This prevents permission confusion between local and remote directories
+echo "Removing previous Remote tool permissions for security..." >&2
+claude config remove permissions.allow "mcp__claude-remote__BashRemote" 2>/dev/null || true
+claude config remove permissions.allow "mcp__claude-remote__ReadRemote" 2>/dev/null || true
+claude config remove permissions.allow "mcp__claude-remote__WriteRemote" 2>/dev/null || true
+claude config remove permissions.allow "mcp__claude-remote__EditRemote" 2>/dev/null || true
+claude config remove permissions.allow "mcp__claude-remote__MultiEditRemote" 2>/dev/null || true
+claude config remove permissions.allow "mcp__claude-remote__LSRemote" 2>/dev/null || true
+claude config remove permissions.allow "mcp__claude-remote__GlobRemote" 2>/dev/null || true
+claude config remove permissions.allow "mcp__claude-remote__GrepRemote" 2>/dev/null || true
+
 # Launch claude with disabled local tools and enabled MCP server
 echo "Launching Claude with remote tools for $TARGET..." >&2
 exec claude \
