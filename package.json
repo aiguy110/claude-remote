@@ -1,5 +1,5 @@
 {
-  "name": "claude-remote-tools",
+  "name": "@aiguy110/claude-remote",
   "version": "1.0.0",
   "description": "Remote SSH tools for Claude Code - operate on remote systems seamlessly",
   "main": "dist/index.js",
@@ -9,7 +9,8 @@
     "start": "node dist/index.js",
     "dev": "tsc --watch",
     "prepublishOnly": "npm run build",
-    "test": "echo \"No tests yet\" && exit 0"
+    "test": "echo \"No tests yet\" && exit 0",
+    "postinstall": "node install-completion.js"
   },
   "bin": {
     "claude-remote": "./claude-remote"
@@ -17,6 +18,9 @@
   "files": [
     "dist/**/*",
     "claude-remote",
+    "_claude-remote",
+    "claude-remote-completion.bash",
+    "install-completion.js",
     "README.md",
     "LICENSE"
   ],
@@ -45,12 +49,12 @@
   ],
   "author": "",
   "license": "MIT",
-  "homepage": "https://github.com/aiguy110/claude-remote-tools",
+  "homepage": "https://github.com/aiguy110/claude-remote",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aiguy110/claude-remote-tools.git"
+    "url": "git+https://github.com/aiguy110/claude-remote.git"
   },
   "bugs": {
-    "url": "https://github.com/aiguy110/claude-remote-tools/issues"
+    "url": "https://github.com/aiguy110/claude-remote/issues"
   }
 }

@@ -15,8 +15,25 @@ An npm package that provides remote versions of Claude Code tools, allowing you 
 ## 📦 Installation
 
 ```bash
-npm install -g claude-remote-tools
+npm install -g @aiguy110/claude-remote
 ```
+
+**Shell completion is automatically installed!** 🎉
+
+The package automatically installs bash and zsh completions during installation. After installing, restart your terminal or run:
+
+```bash
+# For bash users:
+source ~/.bashrc
+
+# For zsh users:  
+source ~/.zshrc
+```
+
+The completion provides:
+- SSH host completion from `~/.ssh/config` 
+- Claude CLI argument completion after the target
+- Common remote path suggestions
 
 ## 🚀 Quick Start
 
@@ -136,5 +153,5 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## 🔗 Links
 
 - [Claude Code Documentation](https://docs.anthropic.com/claude/docs)
-- [Report Issues](https://github.com/aiguy110/claude-remote-tools/issues)
-- [npm Package](https://www.npmjs.com/package/claude-remote-tools)
+- [Report Issues](https://github.com/aiguy110/claude-remote/issues)
+- [npm Package](https://www.npmjs.com/package/@aiguy110/claude-remote)

@@ -1,0 +1,104 @@
+#compdef claude-remote
+
+# Zsh completion for claude-remote
+# Usage: claude-remote host:path [claude arguments...]
+
+_claude-remote() {
+    local context state state_descr line
+    typeset -A opt_args
+
+    _arguments -C \
+        '1:target:_claude_remote_targets' \
+        '*::claude arguments:_claude_remote_claude_args'
+}
+
+# Complete SSH hosts from ~/.ssh/config for host:path format
+_claude_remote_targets() {
+    local hosts paths
+    
+    # Extract hosts from ~/.ssh/config
+    if [[ -f ~/.ssh/config ]]; then
+        hosts=(${(f)"$(awk '/^[[:space:]]*Host[[:space:]]/ { 
+            for(i=2; i<=NF; i++) {
+                if($i !~ /[*?]/) print $i
+            }
+        }' ~/.ssh/config 2>/dev/null)"})
+    fi
+    
+    # If we have a partial completion with a colon, we're completing the path part
+    if [[ $PREFIX == *:* ]]; then
+        local host=${PREFIX%%:*}
+        local path_prefix=${PREFIX#*:}
+        
+        # For path completion, we can't easily complete remote paths without SSH
+        # So we'll just suggest common paths
+        local common_paths=(
+            "/"
+            "/home/"
+            "/var/www/"
+            "/opt/"
+            "/usr/local/"
+            "/tmp/"
+        )
+        
+        _describe 'remote paths' common_paths -P "${host}:"
+    else
+        # Complete host names
+        if [[ ${#hosts[@]} -gt 0 ]]; then
+            _describe 'SSH hosts' hosts -S ':'
+        fi
+    fi
+}
+
+# Complete claude CLI arguments after the target
+_claude_remote_claude_args() {
+    # Claude CLI options (extracted from claude --help)
+    local claude_options=(
+        '--debug[Enable debug mode]'
+        '--verbose[Override verbose mode setting from config]'
+        '-p[Print response and exit]'
+        '--print[Print response and exit]'
+        '--output-format[Output format]:format:(text json stream-json)'
+        '--input-format[Input format]:format:(text stream-json)'
+        '--mcp-debug[Enable MCP debug mode]'
+        '--dangerously-skip-permissions[Bypass all permission checks]'
+        '--allowedTools[Comma or space-separated list of tool names to allow]:tools:'
+        '--disallowedTools[Comma or space-separated list of tool names to deny]:tools:'
+        '--mcp-config[Load MCP servers from JSON files or strings]:configs:'
+        '--append-system-prompt[Append a system prompt]:prompt:'
+        '--permission-mode[Permission mode]:mode:(acceptEdits bypassPermissions default plan)'
+        '-c[Continue the most recent conversation]'
+        '--continue[Continue the most recent conversation]'
+        '-r[Resume a conversation]'
+        '--resume[Resume a conversation]:sessionId:'
+        '--model[Model for the current session]:model:'
+        '--fallback-model[Fallback model when default is overloaded]:model:'
+        '--settings[Path to settings JSON file or JSON string]:file:_files'
+        '--add-dir[Additional directories to allow tool access]:directories:_directories'
+        '--ide[Automatically connect to IDE on startup]'
+        '--strict-mcp-config[Only use MCP servers from --mcp-config]'
+        '--session-id[Use specific session ID]:uuid:'
+        '-v[Output version number]'
+        '--version[Output version number]'
+        '-h[Display help]'
+        '--help[Display help]'
+    )
+    
+    # Claude CLI commands
+    local claude_commands=(
+        'config:Manage configuration'
+        'mcp:Configure and manage MCP servers'
+        'migrate-installer:Migrate from global npm installation'
+        'setup-token:Set up authentication token'
+        'doctor:Check Claude Code health'
+        'update:Check for updates'
+        'install:Install Claude Code native build'
+    )
+    
+    _alternative \
+        'options:option:_describe "claude options" claude_options' \
+        'commands:command:_describe "claude commands" claude_commands' \
+        'prompts:prompt:_message "enter prompt"'
+}
+
+_claude-remote "$@"
